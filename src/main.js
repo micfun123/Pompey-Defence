@@ -5,6 +5,31 @@ import { GameManager } from './GameManager.js';
 const app = new PIXI.Application();
 
 async function init() {
+  console.log('Initializing game...');
+  
+  const startMenu = document.getElementById('startMenu');
+  const startBtn = document.getElementById('startBtn');
+  const ui = document.getElementById('ui');
+
+  if (startBtn) {
+    console.log('Start button found, adding listener');
+    startBtn.addEventListener('click', () => {
+      console.log('Start button clicked!');
+      startMenu.style.display = 'none';
+      ui.style.display = 'flex';
+      
+      // Initialize PIXI if not already initialized
+      if (window.gameManager) {
+        console.log('Spawning first wave...');
+        setTimeout(() => {
+          window.gameManager.spawnWave();
+        }, 2000);
+      }
+    });
+  } else {
+    console.error('Start button NOT found in DOM');
+  }
+
   // Initialize PIXI (Required in v8)
   await app.init({
     resizeTo: window,
@@ -17,17 +42,13 @@ async function init() {
 
   // Initialize game manager
   const gameManager = new GameManager(app);
+  window.gameManager = gameManager;
 
   // Draw terrain, grid and path
   gameManager.drawTerrain();
   gameManager.drawGrid();
   gameManager.drawPath();
   gameManager.renderLandmarks();
-
-  // Spawn first wave after 2 seconds
-  setTimeout(() => {
-    gameManager.spawnWave();
-  }, 2000);
 
   // Game loop
   app.ticker.add((delta) => {
@@ -39,9 +60,6 @@ async function init() {
     document.getElementById('score').textContent = gameManager.score;
     document.getElementById('wave').textContent = gameManager.wave;
   });
-
-  // Expose gameManager to console for debugging
-  window.gameManager = gameManager;
 
   // Tower selection logic
   const basicBtn = document.getElementById('basicTowerBtn');

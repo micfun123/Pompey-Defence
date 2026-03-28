@@ -37,13 +37,111 @@
         transform: translateX(-50%);
         color: #fff;
         font-size: 18px;
-        display: flex;
+        display: none; /* Hidden by default */
         flex-direction: column;
         align-items: center;
         gap: 20px;
         pointer-events: none; /* Let clicks pass through to canvas */
         z-index: 10;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      }
+      #startMenu {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        color: white;
+      }
+      .title {
+        font-size: 72px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-shadow: 0 0 20px #1e90ff;
+        letter-spacing: 5px;
+        text-align: center;
+      }
+      .subtitle {
+        font-size: 24px;
+        margin-bottom: 40px;
+        color: #aaa;
+      }
+      .flags {
+        display: flex;
+        gap: 50px;
+        margin-bottom: 50px;
+      }
+      .flag-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .flag {
+        width: 120px;
+        height: 80px;
+        border: 2px solid #fff;
+        box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      /* French Flag */
+      .flag-fr {
+        display: flex;
+      }
+      .flag-fr div { flex: 1; height: 100%; }
+      .fr-blue { background: #002395; }
+      .fr-white { background: #fff; }
+      .fr-red { background: #ed2939; }
+      
+      /* English Flag (St George's Cross) */
+      .flag-en {
+        background: #fff;
+      }
+      .en-cross-v {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 20px;
+        height: 100%;
+        background: #ce1124;
+        transform: translateX(-50%);
+      }
+      .en-cross-h {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 20px;
+        background: #ce1124;
+        transform: translateY(-50%);
+      }
+
+      #startBtn {
+        padding: 20px 50px;
+        font-size: 28px;
+        background: #1e90ff;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+        text-transform: uppercase;
+        box-shadow: 0 0 20px rgba(30, 144, 255, 0.4);
+        pointer-events: auto;
+      }
+      #startBtn:hover {
+        background: #fff;
+        color: #1e90ff;
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
       }
       #stats, #towerSelect {
         pointer-events: auto; /* Re-enable clicks for UI elements */
@@ -79,6 +177,28 @@
   </head>
   <body>
     <div id="gameContainer">
+      <div id="startMenu">
+        <h1 class="title">POMPEY DEFENCE</h1>
+        <p class="subtitle">Defend Portsmouth from the French invasion!</p>
+        <div class="flags">
+          <div class="flag-container">
+            <div class="flag flag-en">
+              <div class="en-cross-v"></div>
+              <div class="en-cross-h"></div>
+            </div>
+            <span>Great Britain</span>
+          </div>
+          <div class="flag-container">
+            <div class="flag flag-fr">
+              <div class="fr-blue"></div>
+              <div class="fr-white"></div>
+              <div class="fr-red"></div>
+            </div>
+            <span>France</span>
+          </div>
+        </div>
+        <button id="startBtn">START DEFENCE</button>
+      </div>
       <div id="app"></div>
       <div id="ui">
         <div id="stats">
