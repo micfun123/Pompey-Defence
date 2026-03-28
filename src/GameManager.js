@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { Tower } from './Tower.js';
-import { Enemy, FastEnemy, TankEnemy } from './Enemy.js';
+import { Enemy, FastEnemy, TankEnemy, BossEnemy } from './Enemy.js';
 import { Projectile } from './Projectile.js';
 
 /**
@@ -171,7 +171,7 @@ export class GameManager {
     const enemyCount = waveConfig.count || (5 + this.wave * 2);
     
     // Determine available enemy types for this wave
-    const availableTypes = [Enemy, FastEnemy, TankEnemy].filter(type => type.minWave <= this.wave);
+    const availableTypes = [Enemy, FastEnemy, TankEnemy, BossEnemy].filter(type => type.minWave <= this.wave);
 
     for (let i = 0; i < enemyCount; i++) {
       setTimeout(() => {
@@ -179,9 +179,9 @@ export class GameManager {
         const EnemyType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
         
         const enemyConfig = {
-          health: (50 + this.wave * 10) * (EnemyType === TankEnemy ? 2 : EnemyType === FastEnemy ? 0.6 : 1),
-          speed: (1 + this.wave * 0.1) * (EnemyType === FastEnemy ? 1.5 : EnemyType === TankEnemy ? 0.5 : 1),
-          bounty: (10 + this.wave * 5) * (EnemyType === TankEnemy ? 2.5 : EnemyType === FastEnemy ? 1.2 : 1),
+          health: (50 + this.wave * 10) * (EnemyType === BossEnemy ? 10 : EnemyType === TankEnemy ? 2 : EnemyType === FastEnemy ? 0.6 : 1),
+          speed: (1 + this.wave * 0.1) * (EnemyType === BossEnemy ? 0.5 : EnemyType === FastEnemy ? 1.5 : EnemyType === TankEnemy ? 0.5 : 1),
+          bounty: (10 + this.wave * 5) * (EnemyType === BossEnemy ? 10 : EnemyType === TankEnemy ? 2.5 : EnemyType === FastEnemy ? 1.2 : 1),
           path: this.path,
         };
 

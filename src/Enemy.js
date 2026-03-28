@@ -1,5 +1,6 @@
 import { GameObject } from './GameObject.js';
 import * as PIXI from 'pixi.js';
+import shippic from './assets/ship.png';
 
 /**
  * Enemy class - enemies that move along the path
@@ -185,5 +186,63 @@ export class TankEnemy extends Enemy {
     graphics.poly([-15, 0, -10, -15, 10, -15, 15, 0, 10, 15, -10, 15]);
     graphics.fill({ color: 0x4444ff });
     graphics.stroke({ color: 0x0000ff, width: 3 });
+  }
+}
+
+/**
+ * BossEnemy - Uses an external asset
+ */
+export class BossEnemy extends Enemy {
+  static minWave = 5;
+  
+  constructor(x, y, config = {}) {
+    super(x, y, {
+      health: config.health || 500,
+      speed: config.speed || 0.4,
+      bounty: config.bounty || 100,
+      armor: config.armor || 5,
+      type: 'boss',
+      ...config
+    });
+  }
+
+  createSprite() {
+    const container = new PIXI.Container();
+    
+    // Use an asset for the boss enemy, loaded via Assets to work in PIXI v8
+    const body = new PIXI.Sprite();
+    body.anchor.set(0.5);
+    
+    // Asynchronously load the texture
+    PIXI.Assets.load(shippic).then((texture) => {
+      body.texture = texture;
+      body.width = 40;
+      body.height = 40;
+    }).catch((err) => console.error('Failed to load boss texture:', err));
+    
+    // Draw a health bar background
+    const healthBarBg = new PIXI.Graphics();
+    healthBarBg.rect(-20, -30, 40, 6);
+    healthBarBg.fill({ color: 0x333333 });
+    
+    // Draw health bar
+    this.healthBar = new PIXI.Graphics();
+    this.updateHealthBar();
+    
+    container.addChild(body);
+    container.addChild(healthBarBg);
+    container.addChild(this.healthBar);
+    
+    return container;
+  }
+
+  updateHealthBar() {
+    if (!this.healthBar) return;
+    
+    this.healthBar.clear();
+    const healthPercent = this.getHealthPercent();
+    const color = healthPercent > 0.5 ? 0x00ff00 : healthPercent > 0.25 ? 0xffff00 : 0xff0000;
+    this.healthBar.rect(-20, -30, 40 * healthPercent, 6);
+    this.healthBar.fill({ color });
   }
 }
