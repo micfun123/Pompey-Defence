@@ -127,9 +127,11 @@ export class GameManager {
       const p2 = this.path[i+1];
       
       // Distance from point to line segment
-      const distance = this.distToSegment({x, y}, p1, p2);
-      if (distance < 25) return false;
+
+      //const distance = this.distToSegment({x, y}, p1, p2);
+      //if (distance < 25) return false;
     }
+
 
     // Check if too close to other towers
     return !this.towers.some(tower => {
