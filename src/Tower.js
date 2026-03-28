@@ -1,5 +1,6 @@
 import { GameObject } from './GameObject.js';
 import * as PIXI from 'pixi.js';
+import portlander_head from "./assets/portlander_head.png";
 
 /**
  * Tower class - base tower for the defence game
@@ -23,25 +24,22 @@ export class Tower extends GameObject {
    */
   createSprite() {
     const container = new PIXI.Container();
-    
+
+    const body = new PIXI.Sprite();
+
+    PIXI.Assets.load(portlander_head).then((texture) => {
+      body.texture = texture;
+      body.width = 32;
+      body.height = 32;
+    }).catch((err) => console.error('Failed to load boss texture:', err));
+
     // Range indicator (at bottom)
     const rangeCircle = new PIXI.Graphics();
     rangeCircle.circle(0, 0, this.range);
     rangeCircle.stroke({ color: 0x00ff00, width: 1, alpha: 0.1 });
     
-    // Base circle
-    const base = new PIXI.Graphics();
-    base.circle(0, 0, 16);
-    base.fill({ color: 0x00aa00 });
-    
-    // Top circle (more saturated)
-    const top = new PIXI.Graphics();
-    top.circle(0, 0, 12);
-    top.fill({ color: 0x00ff00 });
-    
     container.addChild(rangeCircle);
-    container.addChild(base);
-    container.addChild(top);
+    container.addChild(body);
     
     return container;
   }
