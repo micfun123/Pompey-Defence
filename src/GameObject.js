@@ -40,6 +40,8 @@ export class GameObject {
     if (!this.sprite) {
       this.sprite = this.createSprite();
     }
+    this.sprite.x = this.x;
+    this.sprite.y = this.y;
     container.addChild(this.sprite);
   }
 

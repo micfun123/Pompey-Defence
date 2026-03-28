@@ -22,6 +22,7 @@ async function init() {
   gameManager.drawTerrain();
   gameManager.drawGrid();
   gameManager.drawPath();
+  gameManager.renderLandmarks();
 
   // Spawn first wave after 2 seconds
   setTimeout(() => {

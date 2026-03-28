@@ -2,6 +2,12 @@ import * as PIXI from 'pixi.js';
 import { Tower, StrongerTower, DogTower } from './Tower.js';
 import { Enemy, FastEnemy, TankEnemy, BossEnemy, FrenchTankEnemy } from './Enemy.js';
 import { Projectile } from './Projectile.js';
+import { Landmark } from './Landmark.js';
+
+// Import assets for landmarks
+import ship from './assets/ship.png';
+import spiniker from './assets/spiniker.png';
+import portlander_head from './assets/portlander_head.png';
 
 /**
  * GameManager - handles game state, updates, and interactions
@@ -15,6 +21,7 @@ export class GameManager {
     this.towers = [];
     this.enemies = [];
     this.projectiles = [];
+    this.landmarks = [];
     this.wave = 1;
     this.gold = 500;
     this.lives = 20;
@@ -42,6 +49,26 @@ export class GameManager {
     ];
 
     this.setupEventListeners();
+    this.setupLandmarks();
+  }
+
+  /**
+   * Setup iconic Portsmouth landmarks to defend
+   */
+  setupLandmarks() {
+    this.landmarks.push(new Landmark(50, 160, 'HMS Victory', ship));
+    this.landmarks.push(new Landmark(300, 460, 'Fratton Park'));
+    this.landmarks.push(new Landmark(600, 760, 'Southsea Castle'));
+    this.landmarks.push(new Landmark(1000, 260, 'Portsmouth Guildhall'));
+    this.landmarks.push(new Landmark(1400, 660, 'Gunwharf Quays'));
+    this.landmarks.push(new Landmark(1900, 400, 'Old Portsmouth', portlander_head));
+  }
+
+  /**
+   * Render all landmarks to the container
+   */
+  renderLandmarks() {
+    this.landmarks.forEach(landmark => landmark.render(this.container));
   }
 
   /**
@@ -371,6 +398,11 @@ export class GameManager {
         this.createProjectile(tower, targetEnemy);
         tower.resetShotTimer();
       }
+    });
+
+    // Update landmarks
+    this.landmarks.forEach(landmark => {
+      landmark.update(delta);
     });
 
     // Update enemies
