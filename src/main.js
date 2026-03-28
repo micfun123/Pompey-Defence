@@ -1,60 +1,45 @@
-import './style.css'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.js'
+// description: This example demonstrates how to use a Container to group and manipulate multiple sprites
+import { Application, Assets, Container, Sprite } from 'pixi.js';
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src=${viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+(async () => {
+  // Create a new application
+  const app = new Application();
 
-<div class="ticks"></div>
+  // Initialize the application
+  await app.init({ background: '#1099bb', resizeTo: window });
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src=${viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+  // Append the application canvas to the document body
+  document.body.appendChild(app.canvas);
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+  // Create and add a container to the stage
+  const container = new Container();
 
-setupCounter(document.querySelector('#counter'))
+  app.stage.addChild(container);
+
+  // Load the bunny texture
+  const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
+
+  // Create a 5x5 grid of bunnies in the container
+  for (let i = 0; i < 25; i++) {
+    const bunny = new Sprite(texture);
+
+    bunny.x = (i % 5) * 40;
+    bunny.y = Math.floor(i / 5) * 40;
+    container.addChild(bunny);
+  }
+
+  // Move the container to the center
+  container.x = app.screen.width / 2;
+  container.y = app.screen.height / 2;
+
+  // Center the bunny sprites in local container coordinates
+  container.pivot.x = container.width / 2;
+  container.pivot.y = container.height / 2;
+
+  // Listen for animate update
+  app.ticker.add((time) => {
+    // Continuously rotate the container!
+    // * use delta to create frame-independent transform *
+    container.rotation -= 0.01 * time.deltaTime;
+  });
+})();
