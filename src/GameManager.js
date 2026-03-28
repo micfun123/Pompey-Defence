@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Tower, StrongerTower } from './Tower.js';
+import { Tower, StrongerTower, DogTower } from './Tower.js';
 import { Enemy, FastEnemy, TankEnemy, BossEnemy, FrenchTankEnemy } from './Enemy.js';
 import { Projectile } from './Projectile.js';
 
@@ -235,9 +235,12 @@ export class GameManager {
    */
   getTowerPlacementInfo(type) {
     if (type === 'stronger') {
-      return { minPathDist: 80, maxPathDist: 400, range: 240 };
+      return { minPathDist: 50, maxPathDist: 300, range: 300 };
     }
-    return { minPathDist: 40, maxPathDist: 160, range: 160 };
+    if (type === 'dog') {
+      return { minPathDist: 20, maxPathDist: 120, range: 80 };
+    }
+    return { minPathDist: 25, maxPathDist: 100, range: 100 };
   }
 
   distToSegment(p, v, w) {
@@ -262,6 +265,13 @@ export class GameManager {
         return false;
       }
       tower = new StrongerTower(x, y);
+    } else if (this.selectedTowerType === 'dog') {
+      cost = 50;
+      if (this.gold < cost) {
+        console.log('Not enough gold for Dog Tower!');
+        return false;
+      }
+      tower = new DogTower(x, y);
     } else {
       if (this.gold < cost) {
         console.log('Not enough gold for Basic Tower!');

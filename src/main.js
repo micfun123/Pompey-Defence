@@ -45,17 +45,27 @@ async function init() {
   // Tower selection logic
   const basicBtn = document.getElementById('basicTowerBtn');
   const strongerBtn = document.getElementById('strongerTowerBtn');
+  const dogBtn = document.getElementById('dogTowerBtn');
 
   basicBtn.addEventListener('click', () => {
     gameManager.selectedTowerType = 'basic';
     basicBtn.classList.add('selected');
     strongerBtn.classList.remove('selected');
+    dogBtn.classList.remove('selected');
   });
 
   strongerBtn.addEventListener('click', () => {
     gameManager.selectedTowerType = 'stronger';
     strongerBtn.classList.add('selected');
     basicBtn.classList.remove('selected');
+    dogBtn.classList.remove('selected');
+  });
+
+  dogBtn.addEventListener('click', () => {
+    gameManager.selectedTowerType = 'dog';
+    dogBtn.classList.add('selected');
+    basicBtn.classList.remove('selected');
+    strongerBtn.classList.remove('selected');
   });
 }
 

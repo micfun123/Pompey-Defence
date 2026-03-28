@@ -1,6 +1,8 @@
 import { GameObject } from './GameObject.js';
 import * as PIXI from 'pixi.js';
 import portlander_head from "./assets/portlander_head.png";
+import spiniker from "./assets/spiniker.png";
+import doggy from "./assets/doggy.png";
 
 /**
  * Tower class - base tower for the defence game
@@ -31,7 +33,8 @@ export class Tower extends GameObject {
       body.texture = texture;
       body.width = 32;
       body.height = 32;
-    }).catch((err) => console.error('Failed to load boss texture:', err));
+      body.anchor.set(0.5);
+    }).catch((err) => console.error('Failed to load tower texture:', err));
 
     // Range indicator (at bottom)
     const rangeCircle = new PIXI.Graphics();
@@ -101,11 +104,11 @@ export class StrongerTower extends Tower {
   constructor(x, y, config = {}) {
     const strongerConfig = {
       cost: 250,
-      damage: 30,
-      range: 150,
-      fireRate: 0.8, // slower but more powerful
+      damage: 50,
+      range: 300,
+      fireRate: 0.5, // slower but more powerful
       minPathDist: 50, // Must be further from the path than basic
-      maxPathDist: 250, // Can be placed much further away
+      maxPathDist: 300, // Can be placed much further away
       type: 'stronger',
       ...config
     };
@@ -118,30 +121,67 @@ export class StrongerTower extends Tower {
   createSprite() {
     const container = new PIXI.Container();
     
+    const body = new PIXI.Sprite();
+
+    PIXI.Assets.load(spiniker).then((texture) => {
+      body.texture = texture;
+      body.width = 64;
+      body.height = 64;
+      body.anchor.set(0.5);
+    }).catch((err) => console.error('Failed to load spiniker texture:', err));
+
     // Range indicator (at bottom)
     const rangeCircle = new PIXI.Graphics();
     rangeCircle.circle(0, 0, this.range);
     rangeCircle.stroke({ color: 0xff0000, width: 1, alpha: 0.1 });
     
-    // Base circle (different color)
-    const base = new PIXI.Graphics();
-    base.circle(0, 0, 18); // larger base
-    base.fill({ color: 0xaa0000 });
+    container.addChild(rangeCircle);
+    container.addChild(body);
     
-    // Middle section
-    const middle = new PIXI.Graphics();
-    middle.poly([-12, 10, 12, 10, 0, -12]); // triangle
-    middle.fill({ color: 0xff4400 });
+    return container;
+  }
+}
+
+/**
+ * DogTower class - cheaper, weaker, but faster firing
+ */
+export class DogTower extends Tower {
+  constructor(x, y, config = {}) {
+    const dogConfig = {
+      cost: 50,
+      damage: 5,
+      range: 80,
+      fireRate: 2, // fast firing
+      minPathDist: 20,
+      maxPathDist: 120,
+      type: 'dog',
+      ...config
+    };
+    super(x, y, dogConfig);
+  }
+
+  /**
+   * Create dog tower sprite
+   */
+  createSprite() {
+    const container = new PIXI.Container();
     
-    // Top circle
-    const top = new PIXI.Graphics();
-    top.circle(0, -15, 8);
-    top.fill({ color: 0xff0000 });
+    const body = new PIXI.Sprite();
+
+    PIXI.Assets.load(doggy).then((texture) => {
+      body.texture = texture;
+      body.width = 24;
+      body.height = 24;
+      body.anchor.set(0.5);
+    }).catch((err) => console.error('Failed to load doggy texture:', err));
+
+    // Range indicator (at bottom)
+    const rangeCircle = new PIXI.Graphics();
+    rangeCircle.circle(0, 0, this.range);
+    rangeCircle.stroke({ color: 0xffff00, width: 1, alpha: 0.1 });
     
     container.addChild(rangeCircle);
-    container.addChild(base);
-    container.addChild(middle);
-    container.addChild(top);
+    container.addChild(body);
     
     return container;
   }
