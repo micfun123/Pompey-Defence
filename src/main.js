@@ -7,9 +7,9 @@ const app = new PIXI.Application();
 async function init() {
   // Initialize PIXI (Required in v8)
   await app.init({
-    width: 800,
-    height: 600,
+    resizeTo: window,
     backgroundColor: 0x1a1a2e,
+    antialias: true,
   });
 
   // Append to #app div instead of body

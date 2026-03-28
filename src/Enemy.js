@@ -1,6 +1,8 @@
 import { GameObject } from './GameObject.js';
 import * as PIXI from 'pixi.js';
 import shippic from './assets/ship.png';
+import frenchmanpic from './assets/french_man.png';
+import frenchtankpic from './assets/french_tank.png';
 
 /**
  * Enemy class - enemies that move along the path
@@ -28,13 +30,14 @@ export class Enemy extends GameObject {
   createSprite() {
     const container = new PIXI.Container();
     
-    // Draw an enemy unit
-    const body = new PIXI.Graphics();
-    this.drawBody(body);
+    // Draw an enemy unit (can be sprite or graphics)
+    const body = this.createBody();
     
     // Draw a health bar background
     const healthBarBg = new PIXI.Graphics();
-    healthBarBg.rect(-12, -22, 24, 4);
+    const barWidth = this.getBarWidth();
+    const barY = this.getBarY();
+    healthBarBg.rect(-barWidth/2, -barY, barWidth, 4);
     healthBarBg.fill({ color: 0x333333 });
     
     // Draw health bar (will be updated in updateHealthBar)
@@ -49,7 +52,27 @@ export class Enemy extends GameObject {
   }
 
   /**
-   * Draw the enemy's body (to be overridden)
+   * Create the enemy's body visual
+   */
+  createBody() {
+    const body = new PIXI.Sprite();
+    body.anchor.set(0.5);
+    
+    // Asynchronously load the texture
+    PIXI.Assets.load(frenchmanpic).then((texture) => {
+      body.texture = texture;
+      body.width = 50;
+      body.height = 50;
+    }).catch((err) => console.error('Failed to load french_man texture:', err));
+    
+    return body;
+  }
+
+  getBarWidth() { return 40; }
+  getBarY() { return 35; }
+
+  /**
+   * Draw the enemy's body (legacy/fallback)
    */
   drawBody(graphics) {
     graphics.rect(-12, -12, 24, 24);
@@ -66,7 +89,10 @@ export class Enemy extends GameObject {
     this.healthBar.clear();
     const healthPercent = this.getHealthPercent();
     const color = healthPercent > 0.5 ? 0x00ff00 : healthPercent > 0.25 ? 0xffff00 : 0xff0000;
-    this.healthBar.rect(-12, -22, 24 * healthPercent, 4);
+    
+    const barWidth = this.getBarWidth();
+    const barY = this.getBarY();
+    this.healthBar.rect(-barWidth/2, -barY, barWidth * healthPercent, 4);
     this.healthBar.fill({ color });
   }
 
@@ -156,11 +182,13 @@ export class FastEnemy extends Enemy {
     });
   }
 
-  drawBody(graphics) {
+  createBody() {
+    const graphics = new PIXI.Graphics();
     // Triangular shape for speed
-    graphics.poly([-12, 12, 12, 12, 0, -12]);
+    graphics.poly([-20, 20, 20, 20, 0, -20]);
     graphics.fill({ color: 0x44ff44 });
     graphics.stroke({ color: 0x00ff00, width: 2 });
+    return graphics;
   }
 }
 
@@ -181,12 +209,73 @@ export class TankEnemy extends Enemy {
     });
   }
 
-  drawBody(graphics) {
-    // Hexagonal shape for tankiness
-    graphics.poly([-15, 0, -10, -15, 10, -15, 15, 0, 10, 15, -10, 15]);
-    graphics.fill({ color: 0x4444ff });
-    graphics.stroke({ color: 0x0000ff, width: 3 });
+  createBody() {
+    const body = new PIXI.Sprite();
+    body.anchor.set(0.5);
+    
+    // Asynchronously load the texture
+    PIXI.Assets.load(frenchtankpic).then((texture) => {
+      body.texture = texture;
+      body.width = 70;
+      body.height = 50;
+    }).catch((err) => console.error('Failed to load french_tank texture:', err));
+    
+    return body;
   }
+
+  getBarWidth() { return 60; }
+  getBarY() { return 40; }
+}
+
+/**
+ * FrenchTankEnemy - Slower, high health, and features the Frenchman
+ */
+export class FrenchTankEnemy extends TankEnemy {
+  static minWave = 3;
+
+  constructor(x, y, config = {}) {
+    super(x, y, {
+      health: config.health || 120,
+      speed: config.speed || 0.7,
+      bounty: config.bounty || 35,
+      armor: config.armor || 1,
+      type: 'french_tank',
+      ...config
+    });
+  }
+
+  createBody() {
+    const container = new PIXI.Container();
+    
+    // Tank base
+    const base = new PIXI.Sprite();
+    base.anchor.set(0.5);
+    
+    PIXI.Assets.load(frenchtankpic).then((texture) => {
+      base.texture = texture;
+      base.width = 80;
+      base.height = 60;
+    }).catch((err) => console.error('Failed to load french_tank texture:', err));
+    
+    // Frenchman commander
+    const commander = new PIXI.Sprite();
+    commander.anchor.set(0.5);
+    commander.y = -18;
+    
+    PIXI.Assets.load(frenchmanpic).then((texture) => {
+      commander.texture = texture;
+      commander.width = 45;
+      commander.height = 45;
+    }).catch((err) => console.error('Failed to load french_man texture:', err));
+    
+    container.addChild(base);
+    container.addChild(commander);
+    
+    return container;
+  }
+
+  getBarWidth() { return 70; }
+  getBarY() { return 55; }
 }
 
 /**
@@ -216,13 +305,13 @@ export class BossEnemy extends Enemy {
     // Asynchronously load the texture
     PIXI.Assets.load(shippic).then((texture) => {
       body.texture = texture;
-      body.width = 40;
-      body.height = 40;
+      body.width = 70;
+      body.height = 70;
     }).catch((err) => console.error('Failed to load boss texture:', err));
     
     // Draw a health bar background
     const healthBarBg = new PIXI.Graphics();
-    healthBarBg.rect(-20, -30, 40, 6);
+    healthBarBg.rect(-35, -50, 70, 8);
     healthBarBg.fill({ color: 0x333333 });
     
     // Draw health bar
@@ -242,7 +331,7 @@ export class BossEnemy extends Enemy {
     this.healthBar.clear();
     const healthPercent = this.getHealthPercent();
     const color = healthPercent > 0.5 ? 0x00ff00 : healthPercent > 0.25 ? 0xffff00 : 0xff0000;
-    this.healthBar.rect(-20, -30, 40 * healthPercent, 6);
+    this.healthBar.rect(-35, -50, 70 * healthPercent, 8);
     this.healthBar.fill({ color });
   }
 }

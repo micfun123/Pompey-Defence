@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { Tower, StrongerTower } from './Tower.js';
-import { Enemy, FastEnemy, TankEnemy, BossEnemy } from './Enemy.js';
+import { Enemy, FastEnemy, TankEnemy, BossEnemy, FrenchTankEnemy } from './Enemy.js';
 import { Projectile } from './Projectile.js';
 
 /**
@@ -24,16 +24,21 @@ export class GameManager {
     this.selectedTowerType = 'basic'; // Track selected tower
     this.previewTower = null; // Tower preview for range visualization
 
-    // Game path setup (example)
+    // Game path setup - A large winding route
     this.path = [
-      { x: 0, y: 300 },
-      { x: 200, y: 300 },
-      { x: 200, y: 100 },
-      { x: 400, y: 100 },
-      { x: 400, y: 500 },
-      { x: 600, y: 500 },
-      { x: 600, y: 200 },
-      { x: 800, y: 200 },
+      { x: 0, y: 200 },
+      { x: 300, y: 200 },
+      { x: 300, y: 500 },
+      { x: 150, y: 500 },
+      { x: 150, y: 800 },
+      { x: 600, y: 800 },
+      { x: 600, y: 300 },
+      { x: 1000, y: 300 },
+      { x: 1000, y: 700 },
+      { x: 1400, y: 700 },
+      { x: 1400, y: 400 },
+      { x: 1800, y: 400 },
+      { x: 2000, y: 400 },
     ];
 
     this.setupEventListeners();
@@ -65,7 +70,7 @@ export class GameManager {
    * Update tower preview position and range
    */
   updatePreview(x, y) {
-    const gridSize = 50;
+    const gridSize = 80;
     const snappedX = Math.floor(x / gridSize) * gridSize + gridSize / 2;
     const snappedY = Math.floor(y / gridSize) * gridSize + gridSize / 2;
 
@@ -98,7 +103,7 @@ export class GameManager {
     this.previewTower.stroke({ color: 0x0000ff, width: 1, alpha: 0.2 });
 
     // Tower placeholder
-    this.previewTower.circle(0, 0, 15);
+    this.previewTower.circle(0, 0, 25);
     this.previewTower.fill({ color: color, alpha: 0.5 });
   }
 
@@ -107,18 +112,20 @@ export class GameManager {
    */
   drawGrid() {
     const graphics = new PIXI.Graphics();
-    const gridSize = 50;
+    const gridSize = 80;
+    const width = this.app.screen.width;
+    const height = this.app.screen.height;
     
     // Vertical lines
-    for (let x = 0; x <= 800; x += gridSize) {
+    for (let x = 0; x <= width; x += gridSize) {
       graphics.moveTo(x, 0);
-      graphics.lineTo(x, 600);
+      graphics.lineTo(x, height);
     }
     
     // Horizontal lines
-    for (let y = 0; y <= 600; y += gridSize) {
+    for (let y = 0; y <= height; y += gridSize) {
       graphics.moveTo(0, y);
-      graphics.lineTo(800, y);
+      graphics.lineTo(width, y);
     }
     
     graphics.stroke({ color: 0x444444, width: 1, alpha: 0.3 });
@@ -161,7 +168,7 @@ export class GameManager {
    */
   onCanvasClick(x, y) {
     // Snap to grid (center of grid cell)
-    const gridSize = 50;
+    const gridSize = 80;
     const snappedX = Math.floor(x / gridSize) * gridSize + gridSize / 2;
     const snappedY = Math.floor(y / gridSize) * gridSize + gridSize / 2;
     
@@ -198,7 +205,7 @@ export class GameManager {
     return !this.towers.some(tower => {
       const dx = tower.x - x;
       const dy = tower.y - y;
-      return Math.sqrt(dx * dx + dy * dy) < 40;
+      return Math.sqrt(dx * dx + dy * dy) < 60;
     });
   }
 
@@ -207,9 +214,9 @@ export class GameManager {
    */
   getTowerPlacementInfo(type) {
     if (type === 'stronger') {
-      return { minPathDist: 50, maxPathDist: 250, range: 150 };
+      return { minPathDist: 80, maxPathDist: 400, range: 240 };
     }
-    return { minPathDist: 25, maxPathDist: 100, range: 100 };
+    return { minPathDist: 40, maxPathDist: 160, range: 160 };
   }
 
   distToSegment(p, v, w) {
@@ -255,7 +262,7 @@ export class GameManager {
     const enemyCount = waveConfig.count || (5 + this.wave * 2);
     
     // Determine available enemy types for this wave
-    const availableTypes = [Enemy, FastEnemy, TankEnemy, BossEnemy].filter(type => type.minWave <= this.wave);
+    const availableTypes = [Enemy, FastEnemy, FrenchTankEnemy, TankEnemy, BossEnemy].filter(type => type.minWave <= this.wave);
 
     for (let i = 0; i < enemyCount; i++) {
       setTimeout(() => {
@@ -263,9 +270,23 @@ export class GameManager {
         const EnemyType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
         
         const enemyConfig = {
-          health: (50 + this.wave * 10) * (EnemyType === BossEnemy ? 10 : EnemyType === TankEnemy ? 2 : EnemyType === FastEnemy ? 0.6 : 1),
-          speed: (1 + this.wave * 0.1) * (EnemyType === BossEnemy ? 0.5 : EnemyType === FastEnemy ? 1.5 : EnemyType === TankEnemy ? 0.5 : 1),
-          bounty: (10 + this.wave * 5) * (EnemyType === BossEnemy ? 10 : EnemyType === TankEnemy ? 2.5 : EnemyType === FastEnemy ? 1.2 : 1),
+          health: (50 + this.wave * 10) * (
+            EnemyType === BossEnemy ? 10 : 
+            EnemyType === TankEnemy ? 2 : 
+            EnemyType === FrenchTankEnemy ? 1.5 : 
+            EnemyType === FastEnemy ? 0.6 : 1
+          ),
+          speed: (1 + this.wave * 0.1) * (
+            EnemyType === BossEnemy ? 0.5 : 
+            EnemyType === FastEnemy ? 1.5 : 
+            (EnemyType === TankEnemy || EnemyType === FrenchTankEnemy) ? 0.5 : 1
+          ),
+          bounty: (10 + this.wave * 5) * (
+            EnemyType === BossEnemy ? 10 : 
+            EnemyType === TankEnemy ? 2.5 : 
+            EnemyType === FrenchTankEnemy ? 1.8 : 
+            EnemyType === FastEnemy ? 1.2 : 1
+          ),
           path: this.path,
         };
 
@@ -331,11 +352,11 @@ export class GameManager {
       projectile.update(delta);
 
       if (projectile.hasHitTarget()) {
-        // Check collision with enemies
+        // Check collision with enemies - increased radius for larger sprites
         this.enemies.forEach(enemy => {
           if (enemy.isAlive() && 
-              Math.abs(projectile.x - enemy.x) < 20 && 
-              Math.abs(projectile.y - enemy.y) < 20) {
+              Math.abs(projectile.x - enemy.x) < 50 && 
+              Math.abs(projectile.y - enemy.y) < 50) {
             const isDead = enemy.takeDamage(projectile.damage);
             if (isDead) {
               this.gold += enemy.bounty;
@@ -393,8 +414,8 @@ export class GameManager {
       }
     });
     text.anchor.set(0.5);
-    text.x = 400;
-    text.y = 300;
+    text.x = this.app.screen.width / 2;
+    text.y = this.app.screen.height / 2;
     this.app.stage.addChild(text);
   }
 }
