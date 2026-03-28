@@ -108,6 +108,27 @@ export class GameManager {
   }
 
   /**
+   * Draw the island terrain
+   */
+  drawTerrain() {
+    const width = this.app.screen.width;
+    const height = this.app.screen.height;
+
+    const water = new PIXI.Graphics();
+    water.rect(0, 0, width, height);
+    water.fill({ color: 0x1e90ff }); // Dodger Blue
+    
+    const island = new PIXI.Graphics();
+    // Large green area for the island
+    island.rect(50, 50, width - 100, height - 100);
+    island.fill({ color: 0x228b22, alpha: 0.8 }); // Forest Green
+    island.stroke({ color: 0xdeb887, width: 10 }); // Burlywood beach
+    
+    this.container.addChildAt(water, 0);
+    this.container.addChildAt(island, 1);
+  }
+
+  /**
    * Draw the map grid
    */
   drawGrid() {
@@ -130,7 +151,7 @@ export class GameManager {
     
     graphics.stroke({ color: 0x444444, width: 1, alpha: 0.3 });
     
-    this.container.addChildAt(graphics, 0);
+    this.container.addChildAt(graphics, 2); // Above island(1), below path(3)
   }
 
   /**
@@ -139,7 +160,7 @@ export class GameManager {
   drawPath() {
     const graphics = new PIXI.Graphics();
     
-    // Draw the path line
+    // Draw the path line (Sand/Dirt road)
     if (this.path.length > 0) {
       graphics.moveTo(this.path[0].x, this.path[0].y);
       for (let i = 1; i < this.path.length; i++) {
@@ -147,7 +168,7 @@ export class GameManager {
       }
     }
     
-    graphics.stroke({ color: 0x00ff00, width: 20, alpha: 0.2, cap: 'round', join: 'round' });
+    graphics.stroke({ color: 0xf4a460, width: 60, alpha: 0.8, cap: 'round', join: 'round' }); // Sandy brown
     
     // Draw thin center line
     const centerLine = new PIXI.Graphics();
@@ -157,10 +178,10 @@ export class GameManager {
         centerLine.lineTo(this.path[i].x, this.path[i].y);
       }
     }
-    centerLine.stroke({ color: 0x00ff00, width: 2, alpha: 0.8 });
+    centerLine.stroke({ color: 0xd2b48c, width: 2, alpha: 0.5 }); // Tan
     
-    this.container.addChildAt(graphics, 1); // Add above grid
-    this.container.addChildAt(centerLine, 2);
+    this.container.addChildAt(graphics, 3); // Above water(0), island(1), grid(2)
+    this.container.addChildAt(centerLine, 4);
   }
 
   /**

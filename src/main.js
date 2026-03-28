@@ -18,7 +18,8 @@ async function init() {
   // Initialize game manager
   const gameManager = new GameManager(app);
 
-  // Draw grid and path
+  // Draw terrain, grid and path
+  gameManager.drawTerrain();
   gameManager.drawGrid();
   gameManager.drawPath();
 
