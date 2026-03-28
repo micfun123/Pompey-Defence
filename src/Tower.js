@@ -22,22 +22,20 @@ export class Tower extends GameObject {
   createSprite() {
     const container = new PIXI.Container();
     
+    // Range indicator (at bottom)
+    const rangeCircle = new PIXI.Graphics();
+    rangeCircle.circle(0, 0, this.range);
+    rangeCircle.stroke({ color: 0x00ff00, width: 1, alpha: 0.1 });
+    
     // Base circle
     const base = new PIXI.Graphics();
-    base.fill(0x00aa00);
     base.circle(0, 0, 16);
-    base.fill();
+    base.fill({ color: 0x00aa00 });
     
     // Top circle (more saturated)
     const top = new PIXI.Graphics();
-    top.fill(0x00ff00);
     top.circle(0, 0, 12);
-    top.fill();
-    
-    // Range indicator
-    const rangeCircle = new PIXI.Graphics();
-    rangeCircle.stroke({ color: 0x00ff00, width: 1, alpha: 0.2 });
-    rangeCircle.circle(0, 0, this.range);
+    top.fill({ color: 0x00ff00 });
     
     container.addChild(rangeCircle);
     container.addChild(base);

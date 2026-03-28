@@ -5,6 +5,8 @@ import * as PIXI from 'pixi.js';
  * Enemy class - enemies that move along the path
  */
 export class Enemy extends GameObject {
+  static minWave = 1;
+
   constructor(x, y, config = {}) {
     super(x, y);
     this.health = config.health || 50;
@@ -25,21 +27,14 @@ export class Enemy extends GameObject {
   createSprite() {
     const container = new PIXI.Container();
     
-    // Draw a red enemy unit
+    // Draw an enemy unit
     const body = new PIXI.Graphics();
-    body.fill(0xff4444);
-    body.rect(-12, -12, 24, 24);
-    body.fill();
-    
-    // Add a border
-    body.stroke({ color: 0xff0000, width: 2 });
-    body.rect(-12, -12, 24, 24);
+    this.drawBody(body);
     
     // Draw a health bar background
     const healthBarBg = new PIXI.Graphics();
-    healthBarBg.fill(0x333333);
     healthBarBg.rect(-12, -22, 24, 4);
-    healthBarBg.fill();
+    healthBarBg.fill({ color: 0x333333 });
     
     // Draw health bar (will be updated in updateHealthBar)
     this.healthBar = new PIXI.Graphics();
@@ -53,6 +48,15 @@ export class Enemy extends GameObject {
   }
 
   /**
+   * Draw the enemy's body (to be overridden)
+   */
+  drawBody(graphics) {
+    graphics.rect(-12, -12, 24, 24);
+    graphics.fill({ color: 0xff4444 });
+    graphics.stroke({ color: 0xff0000, width: 2 });
+  }
+
+  /**
    * Update the health bar visualization
    */
   updateHealthBar() {
@@ -60,9 +64,9 @@ export class Enemy extends GameObject {
     
     this.healthBar.clear();
     const healthPercent = this.getHealthPercent();
-    this.healthBar.fill(healthPercent > 0.5 ? 0x00ff00 : healthPercent > 0.25 ? 0xffff00 : 0xff0000);
+    const color = healthPercent > 0.5 ? 0x00ff00 : healthPercent > 0.25 ? 0xffff00 : 0xff0000;
     this.healthBar.rect(-12, -22, 24 * healthPercent, 4);
-    this.healthBar.fill();
+    this.healthBar.fill({ color });
   }
 
   /**
@@ -111,7 +115,13 @@ export class Enemy extends GameObject {
     const actualDamage = Math.max(1, damage - this.armor);
     this.health -= actualDamage;
     this.updateHealthBar();
-    return this.health <= 0;
+    
+    if (this.health <= 0) {
+      this.active = false;
+      return true;
+    }
+    
+    return false;
   }
 
   /**
@@ -126,5 +136,54 @@ export class Enemy extends GameObject {
    */
   isAlive() {
     return this.health > 0 && this.active;
+  }
+}
+
+/**
+ * FastEnemy - Quicker but lower health
+ */
+export class FastEnemy extends Enemy {
+  static minWave = 2;
+  
+  constructor(x, y, config = {}) {
+    super(x, y, {
+      health: config.health || 30,
+      speed: config.speed || 2,
+      bounty: config.bounty || 15,
+      type: 'fast',
+      ...config
+    });
+  }
+
+  drawBody(graphics) {
+    // Triangular shape for speed
+    graphics.poly([-12, 12, 12, 12, 0, -12]);
+    graphics.fill({ color: 0x44ff44 });
+    graphics.stroke({ color: 0x00ff00, width: 2 });
+  }
+}
+
+/**
+ * TankEnemy - Slower but high health and armor
+ */
+export class TankEnemy extends Enemy {
+  static minWave = 4;
+  
+  constructor(x, y, config = {}) {
+    super(x, y, {
+      health: config.health || 150,
+      speed: config.speed || 0.6,
+      bounty: config.bounty || 40,
+      armor: config.armor || 2,
+      type: 'tank',
+      ...config
+    });
+  }
+
+  drawBody(graphics) {
+    // Hexagonal shape for tankiness
+    graphics.poly([-15, 0, -10, -15, 10, -15, 15, 0, 10, 15, -10, 15]);
+    graphics.fill({ color: 0x4444ff });
+    graphics.stroke({ color: 0x0000ff, width: 3 });
   }
 }

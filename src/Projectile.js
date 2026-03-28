@@ -20,16 +20,15 @@ export class Projectile extends GameObject {
   createSprite() {
     const container = new PIXI.Container();
     
-    // Main projectile body
-    const body = new PIXI.Graphics();
-    body.fill(0xffff00);
-    body.circle(0, 0, 5);
-    body.fill();
-    
     // Glow effect
     const glow = new PIXI.Graphics();
-    glow.stroke({ color: 0xffff00, width: 2, alpha: 0.4 });
     glow.circle(0, 0, 8);
+    glow.stroke({ color: 0xffff00, width: 2, alpha: 0.4 });
+    
+    // Main projectile body
+    const body = new PIXI.Graphics();
+    body.circle(0, 0, 5);
+    body.fill({ color: 0xffff00 });
     
     container.addChild(glow);
     container.addChild(body);
