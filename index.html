@@ -33,7 +33,33 @@
         color: #fff;
         font-size: 18px;
         display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+      #stats {
+        display: flex;
         gap: 40px;
+      }
+      #towerSelect {
+        display: flex;
+        gap: 10px;
+      }
+      .tower-btn {
+        padding: 10px 20px;
+        background-color: #333;
+        color: #fff;
+        border: 2px solid #555;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 5px;
+      }
+      .tower-btn.selected {
+        border-color: #00ff00;
+        background-color: #444;
+      }
+      .tower-btn:hover {
+        background-color: #555;
       }
     </style>
   </head>
@@ -41,10 +67,16 @@
     <div id="gameContainer">
       <div id="app"></div>
       <div id="ui">
-        <div>Gold: <span id="gold">500</span></div>
-        <div>Lives: <span id="lives">20</span></div>
-        <div>Score: <span id="score">0</span></div>
-        <div>Wave: <span id="wave">1</span></div>
+        <div id="stats">
+          <div>Gold: <span id="gold">500</span></div>
+          <div>Lives: <span id="lives">20</span></div>
+          <div>Score: <span id="score">0</span></div>
+          <div>Wave: <span id="wave">1</span></div>
+        </div>
+        <div id="towerSelect">
+          <button class="tower-btn selected" id="basicTowerBtn">Basic Tower (100g)</button>
+          <button class="tower-btn" id="strongerTowerBtn">Stronger Tower (250g)</button>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

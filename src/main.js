@@ -40,6 +40,22 @@ async function init() {
 
   // Expose gameManager to console for debugging
   window.gameManager = gameManager;
+
+  // Tower selection logic
+  const basicBtn = document.getElementById('basicTowerBtn');
+  const strongerBtn = document.getElementById('strongerTowerBtn');
+
+  basicBtn.addEventListener('click', () => {
+    gameManager.selectedTowerType = 'basic';
+    basicBtn.classList.add('selected');
+    strongerBtn.classList.remove('selected');
+  });
+
+  strongerBtn.addEventListener('click', () => {
+    gameManager.selectedTowerType = 'stronger';
+    strongerBtn.classList.add('selected');
+    basicBtn.classList.remove('selected');
+  });
 }
 
 init();

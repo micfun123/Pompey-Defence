@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Tower } from './Tower.js';
+import { Tower, StrongerTower } from './Tower.js';
 import { Enemy, FastEnemy, TankEnemy, BossEnemy } from './Enemy.js';
 import { Projectile } from './Projectile.js';
 
@@ -21,6 +21,8 @@ export class GameManager {
     this.score = 0;
     this.gameOver = false;
     this.waveSpawning = false;
+    this.selectedTowerType = 'basic'; // Track selected tower
+    this.previewTower = null; // Tower preview for range visualization
 
     // Game path setup (example)
     this.path = [
@@ -46,6 +48,58 @@ export class GameManager {
       const pos = event.global;
       this.onCanvasClick(pos.x, pos.y);
     });
+
+    this.container.on('pointermove', (event) => {
+      const pos = event.global;
+      this.updatePreview(pos.x, pos.y);
+    });
+
+    this.container.on('pointerout', () => {
+      if (this.previewTower) {
+        this.previewTower.visible = false;
+      }
+    });
+  }
+
+  /**
+   * Update tower preview position and range
+   */
+  updatePreview(x, y) {
+    const gridSize = 50;
+    const snappedX = Math.floor(x / gridSize) * gridSize + gridSize / 2;
+    const snappedY = Math.floor(y / gridSize) * gridSize + gridSize / 2;
+
+    if (!this.previewTower) {
+      this.previewTower = new PIXI.Graphics();
+      this.container.addChild(this.previewTower);
+    }
+
+    this.previewTower.clear();
+    this.previewTower.visible = true;
+    this.previewTower.x = snappedX;
+    this.previewTower.y = snappedY;
+
+    const info = this.getTowerPlacementInfo(this.selectedTowerType);
+    const canPlace = this.canPlaceTower(snappedX, snappedY);
+    const color = canPlace ? 0x00ff00 : 0xff0000;
+
+    // Range circle
+    this.previewTower.circle(0, 0, info.range);
+    this.previewTower.stroke({ color: color, width: 2, alpha: 0.3 });
+    this.previewTower.fill({ color: color, alpha: 0.1 });
+
+    // Placement constraint indicators
+    // Min distance (red-ish)
+    this.previewTower.circle(0, 0, info.minPathDist);
+    this.previewTower.stroke({ color: 0xff0000, width: 1, alpha: 0.2 });
+    
+    // Max distance (blue-ish)
+    this.previewTower.circle(0, 0, info.maxPathDist);
+    this.previewTower.stroke({ color: 0x0000ff, width: 1, alpha: 0.2 });
+
+    // Tower placeholder
+    this.previewTower.circle(0, 0, 15);
+    this.previewTower.fill({ color: color, alpha: 0.5 });
   }
 
   /**
@@ -120,18 +174,25 @@ export class GameManager {
    * Check if tower can be placed at position
    */
   canPlaceTower(x, y) {
-    // Check if on path (very simple check: too close to path points)
-    // In a real game, you would check distance to all segments
+    const info = this.getTowerPlacementInfo(this.selectedTowerType);
+    
+    let minDistanceToPath = Infinity;
+
+    // Check distance to all path segments to find the closest point on the path
     for (let i = 0; i < this.path.length - 1; i++) {
       const p1 = this.path[i];
       const p2 = this.path[i+1];
-      
-      // Distance from point to line segment
-
-      //const distance = this.distToSegment({x, y}, p1, p2);
-      //if (distance < 25) return false;
+      const distance = this.distToSegment({x, y}, p1, p2);
+      if (distance < minDistanceToPath) {
+        minDistanceToPath = distance;
+      }
     }
 
+    // Constraint 1: Must NOT be too close (min distance)
+    if (minDistanceToPath < info.minPathDist) return false;
+
+    // Constraint 2: Must be within "next to" range (max distance)
+    if (minDistanceToPath > info.maxPathDist) return false;
 
     // Check if too close to other towers
     return !this.towers.some(tower => {
@@ -139,6 +200,16 @@ export class GameManager {
       const dy = tower.y - y;
       return Math.sqrt(dx * dx + dy * dy) < 40;
     });
+  }
+
+  /**
+   * Get placement constraints for tower type
+   */
+  getTowerPlacementInfo(type) {
+    if (type === 'stronger') {
+      return { minPathDist: 50, maxPathDist: 250, range: 150 };
+    }
+    return { minPathDist: 25, maxPathDist: 100, range: 100 };
   }
 
   distToSegment(p, v, w) {
@@ -152,14 +223,25 @@ export class GameManager {
   /**
    * Place a new tower
    */
-  placeTower(x, y, towerConfig = {}) {
-    const cost = towerConfig.cost || 100;
-    if (this.gold < cost) {
-      console.log('Not enough gold!');
-      return false;
+  placeTower(x, y) {
+    let tower;
+    let cost = 100;
+
+    if (this.selectedTowerType === 'stronger') {
+      cost = 250;
+      if (this.gold < cost) {
+        console.log('Not enough gold for Stronger Tower!');
+        return false;
+      }
+      tower = new StrongerTower(x, y);
+    } else {
+      if (this.gold < cost) {
+        console.log('Not enough gold for Basic Tower!');
+        return false;
+      }
+      tower = new Tower(x, y);
     }
 
-    const tower = new Tower(x, y, towerConfig);
     this.towers.push(tower);
     this.gold -= cost;
     tower.render(this.container);

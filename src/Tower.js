@@ -11,6 +11,8 @@ export class Tower extends GameObject {
     this.damage = config.damage || 10;
     this.range = config.range || 100;
     this.fireRate = config.fireRate || 1; // shots per second
+    this.minPathDist = config.minPathDist || 25; // Minimum distance from path
+    this.maxPathDist = config.maxPathDist || 100; // Maximum distance from path (must be "next to" it)
     this.timeSinceLastShot = 0;
     this.level = 1;
     this.towerType = config.type || 'basic';
@@ -91,5 +93,58 @@ export class Tower extends GameObject {
   update(delta) {
     super.update(delta);
     // Add tower-specific logic here (animation, effects, etc.)
+  }
+}
+
+/**
+ * StrongerTower class - higher damage, cost, and different look
+ */
+export class StrongerTower extends Tower {
+  constructor(x, y, config = {}) {
+    const strongerConfig = {
+      cost: 250,
+      damage: 30,
+      range: 150,
+      fireRate: 0.8, // slower but more powerful
+      minPathDist: 50, // Must be further from the path than basic
+      maxPathDist: 250, // Can be placed much further away
+      type: 'stronger',
+      ...config
+    };
+    super(x, y, strongerConfig);
+  }
+
+  /**
+   * Create stronger tower sprite
+   */
+  createSprite() {
+    const container = new PIXI.Container();
+    
+    // Range indicator (at bottom)
+    const rangeCircle = new PIXI.Graphics();
+    rangeCircle.circle(0, 0, this.range);
+    rangeCircle.stroke({ color: 0xff0000, width: 1, alpha: 0.1 });
+    
+    // Base circle (different color)
+    const base = new PIXI.Graphics();
+    base.circle(0, 0, 18); // larger base
+    base.fill({ color: 0xaa0000 });
+    
+    // Middle section
+    const middle = new PIXI.Graphics();
+    middle.poly([-12, 10, 12, 10, 0, -12]); // triangle
+    middle.fill({ color: 0xff4400 });
+    
+    // Top circle
+    const top = new PIXI.Graphics();
+    top.circle(0, -15, 8);
+    top.fill({ color: 0xff0000 });
+    
+    container.addChild(rangeCircle);
+    container.addChild(base);
+    container.addChild(middle);
+    container.addChild(top);
+    
+    return container;
   }
 }
